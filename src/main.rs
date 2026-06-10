@@ -14,7 +14,7 @@ struct Args {
     /// Project directory
     project_dir: String,
 
-    /// Output directory (default: <project>/build)
+    /// Output directory (default: <project>/target)
     #[arg(short, long)]
     output: Option<String>,
 
@@ -67,7 +67,7 @@ fn main() -> Result<()> {
 }
 
 fn run_cli(args: Args) -> Result<()> {
-    let out_dir = args.output.unwrap_or_else(|| format!("{}/build", args.project_dir));
+    let out_dir = args.output.unwrap_or_else(|| format!("{}/target", args.project_dir));
     
     let mut build_cfg = HashMap::new();
     for cfg_item in args.cfg {
