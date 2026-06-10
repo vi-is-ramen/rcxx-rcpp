@@ -1,0 +1,5 @@
+[package]
+name = "example"
+version = "0.0.0"
+edition = "2026"  # RC++ 2026 (based on C++26)
+publish = false  # silently cancel publication even if it was initiated (for future package registry)

@@ -1,0 +1,12 @@
+interface {
+    struct Person {
+        u8* _name;
+        u8  _age;
+
+        fn age() -> u8;
+    };
+}
+
+fn Person::age() -> u8 {
+    return _age;
+}

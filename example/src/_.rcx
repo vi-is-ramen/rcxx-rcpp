@@ -1,0 +1,5 @@
+use person::*;  // custom syntax `use` for making RC++ more Rust-like.
+
+fn main() {
+    let person = Person{(u8*)"Bob", 30};
+}
