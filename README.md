@@ -18,13 +18,13 @@ let x = 42;           // transpiles to: const auto x = 42;
 mut counter = 0;      // transpiles to: auto counter = 0;
 
 // Clean function declarations with explicit return types
-fn add(a: i32, b: i32) -> i32 {
+fn add(i32 a, i32 b) -> i32 {
     return a + b;
 }
 // transpiles to: int32_t add(int32_t a, int32_t b) { return a + b; }
 
 // Safe, context-rich error handling without exceptions
-fn divide(a: i32, b: i32) -> i32 {
+fn divide(i32 a, i32 b) -> i32 {
     if b == 0 {
         panic!("Division by zero");
     }
