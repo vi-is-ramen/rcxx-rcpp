@@ -256,13 +256,14 @@ pub fn generate_hpp(
     out.push(format!("// Generated from {}", interface.file));
     out.push("#pragma once\n".to_string());
     
+    // Все use-выражения (и сверху, и внутри interface) добавят свои #include
     for u in uses {
         let inc_path = resolve_include_hash(&u.path, root_module, registry, output_dir);
         out.push(format!("#include \"{}\"", inc_path));
     }
     out.push("".to_string());
 
-    let (_attr_str, include) = translate_attrs(&interface.attrs, build_cfg);
+    let (attr_str, include) = translate_attrs(&interface.attrs, build_cfg);
     if !include { return Ok(out.join("\n")); }
 
     out.push(format!("namespace {} {{\n", namespace_path));
@@ -275,6 +276,8 @@ pub fn generate_hpp(
     for line in &interface.lines {
         let (l_attr, l_inc) = translate_attrs(&line.attrs, build_cfg);
         if !l_inc { continue; }
+        
+        // apply_rcpp_syntax корректно обработает fn, let, mut и panic! внутри интерфейса
         let content = apply_rcpp_syntax(&line.content, namespace_path);
         out.push(format!("{}{}", l_attr, content));
     }

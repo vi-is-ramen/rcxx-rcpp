@@ -18,20 +18,20 @@ pub struct Line {
 pub struct UseStatement {
     pub path: String,
     pub items: Vec<String>,
-    pub _line: Line,
+    pub line: Line,
 }
 
 #[derive(Debug, Clone)]
 pub struct ExternMod {
     pub name: String,
     pub inline_path: Option<String>,
-    pub _line: Line,
+    pub line: Line,
 }
 
 #[derive(Debug, Clone)]
 pub struct InterfaceBlock {
     pub lines: Vec<Line>,
-    pub _start_line: usize,
+    pub start_line: usize,
     pub file: String,
     pub attrs: Vec<Attribute>,
 }
@@ -59,7 +59,6 @@ pub fn parse_file(code: &str, file: &str) -> Result<(Vec<UseStatement>, Vec<Exte
         let line_num = idx + 1;
         let content = line_str.trim().to_string();
         
-        // НОВОЕ: Удаляем однострочные комментарии для парсинга
         let content_without_comment = if let Some(comment_idx) = content.find("//") {
             content[..comment_idx].trim().to_string()
         } else {
@@ -78,30 +77,32 @@ pub fn parse_file(code: &str, file: &str) -> Result<(Vec<UseStatement>, Vec<Exte
             continue;
         }
 
-        if !in_interface && (content_without_comment.is_empty() || content_without_comment.starts_with("//") || content_without_comment.starts_with("/*")) {
+        if !in_interface && (content_without_comment.is_empty() || content_without_comment.starts_with("/*")) {
             line.attrs = pending_attrs.clone();
             pending_attrs.clear();
             rest_lines.push(line);
             continue;
         }
 
-        if !in_interface && content_without_comment.starts_with("use ") {
+        // ИЗМЕНЕНИЕ: Теперь use парсится независимо от того, внутри мы interface или нет
+        if content_without_comment.starts_with("use ") {
             if let Some((path, items)) = parse_use_statement(&content_without_comment) {
                 line.attrs = pending_attrs.clone();
                 pending_attrs.clear();
-                uses.push(UseStatement { path, items, _line: line });
+                uses.push(UseStatement { path, items, line });
+                // Важно: мы делаем continue, чтобы эта строка НЕ попала в interface_lines или rest_lines
                 continue;
             }
         }
 
-        if !in_interface && content_without_comment.starts_with("extern mod ") {
+        if content_without_comment.starts_with("extern mod ") {
             if let Some(caps) = extern_re.captures(&content_without_comment) {
                 line.attrs = pending_attrs.clone();
                 pending_attrs.clear();
                 externs.push(ExternMod {
                     name: caps[1].to_string(),
                     inline_path: caps.get(2).map(|m| m.as_str().to_string()),
-                    _line: line,
+                    line,
                 });
                 continue;
             }
@@ -159,7 +160,7 @@ pub fn parse_file(code: &str, file: &str) -> Result<(Vec<UseStatement>, Vec<Exte
     } else {
         Some(InterfaceBlock {
             lines: interface_lines,
-            _start_line: interface_start_line,
+            start_line: interface_start_line,
             file: file.to_string(),
             attrs: interface_attrs,
         })
