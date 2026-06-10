@@ -74,7 +74,7 @@ fn translate_attrs(attrs: &[Attribute], build_cfg: &HashMap<String, String>) -> 
     let mut cpp_attrs = Vec::new();
     for attr in attrs {
         match attr.name.as_str() {
-            "no_mangle" => cpp_attrs.push("[[gnu::no_mangle]]".to_string()),
+            "no_mangle" => cpp_attrs.push("extern \"C\"".to_string()),
             "inline" => cpp_attrs.push("inline".to_string()),
             "export_name" => {
                 if let Some(name) = attr.args.iter().find(|(k, _)| k == "name").map(|(_, v)| v) {
